@@ -1,11 +1,12 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
 // Halaman utama
 Route::get('/', function () {
-    return auth()->check()
+    return Auth::check()
         ? redirect()->route('dashboard')
         : redirect()->route('login');
 })->name('home');
