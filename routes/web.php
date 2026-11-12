@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ServiceOfferController;
+use App\Http\Controllers\ServiceRequestController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
 
 // Halaman utama
 Route::get('/', function () {
@@ -49,6 +51,52 @@ Route::middleware('auth')->group(function () {
     Route::view('/provider/dashboard', 'dashboard')
         ->middleware('role:provider')
         ->name('provider.dashboard');
+
+    // ===== Butuh Jasa (permintaan dari customer) =====
+    Route::get('/service-requests', [ServiceRequestController::class, 'index'])
+        ->name('service-requests.index');
+
+    // Khusus customer. Harus di atas route {serviceRequest}
+    Route::middleware('role:customer')->group(function () {
+        Route::get('/service-requests/mine', [ServiceRequestController::class, 'mine'])
+            ->name('service-requests.mine');
+        Route::get('/service-requests/create', [ServiceRequestController::class, 'create'])
+            ->name('service-requests.create');
+        Route::post('/service-requests', [ServiceRequestController::class, 'store'])
+            ->name('service-requests.store');
+        Route::get('/service-requests/{serviceRequest}/edit', [ServiceRequestController::class, 'edit'])
+            ->name('service-requests.edit');
+        Route::put('/service-requests/{serviceRequest}', [ServiceRequestController::class, 'update'])
+            ->name('service-requests.update');
+        Route::delete('/service-requests/{serviceRequest}', [ServiceRequestController::class, 'destroy'])
+            ->name('service-requests.destroy');
+    });
+
+    Route::get('/service-requests/{serviceRequest}', [ServiceRequestController::class, 'show'])
+        ->name('service-requests.show');
+
+    // ===== Menyediakan Jasa (penawaran dari provider) =====
+    Route::get('/service-offers', [ServiceOfferController::class, 'index'])
+        ->name('service-offers.index');
+
+    // Khusus provider. Harus di atas route {serviceOffer}
+    Route::middleware('role:provider')->group(function () {
+        Route::get('/service-offers/mine', [ServiceOfferController::class, 'mine'])
+            ->name('service-offers.mine');
+        Route::get('/service-offers/create', [ServiceOfferController::class, 'create'])
+            ->name('service-offers.create');
+        Route::post('/service-offers', [ServiceOfferController::class, 'store'])
+            ->name('service-offers.store');
+        Route::get('/service-offers/{serviceOffer}/edit', [ServiceOfferController::class, 'edit'])
+            ->name('service-offers.edit');
+        Route::put('/service-offers/{serviceOffer}', [ServiceOfferController::class, 'update'])
+            ->name('service-offers.update');
+        Route::delete('/service-offers/{serviceOffer}', [ServiceOfferController::class, 'destroy'])
+            ->name('service-offers.destroy');
+    });
+
+    Route::get('/service-offers/{serviceOffer}', [ServiceOfferController::class, 'show'])
+        ->name('service-offers.show');
 
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])
