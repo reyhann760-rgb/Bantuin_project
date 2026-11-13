@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\ServiceOfferController;
 use App\Http\Controllers\ServiceRequestController;
 use Illuminate\Support\Facades\Auth;
@@ -12,6 +13,16 @@ Route::get('/', function () {
         ? redirect()->route('dashboard')
         : redirect()->route('login');
 })->name('home');
+
+
+// ===== Preview Frontend 1 (data dummy, bisa dibuka tanpa login) =====
+Route::get('/beranda', [PageController::class, 'home'])->name('beranda');
+
+Route::get('/butuh-jasa', [PageController::class, 'butuhIndex'])->name('butuh.index');
+Route::get('/butuh-jasa/{id}', [PageController::class, 'butuhShow'])->name('butuh.show');
+
+Route::get('/menyediakan-jasa', [PageController::class, 'sediaIndex'])->name('sedia.index');
+Route::get('/menyediakan-jasa/{id}', [PageController::class, 'sediaShow'])->name('sedia.show');
 
 
 // Route untuk pengguna yang belum login
