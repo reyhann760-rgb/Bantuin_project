@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ServiceOfferController;
 use App\Http\Controllers\ServiceRequestController;
@@ -115,6 +116,11 @@ Route::middleware('auth')->group(function () {
         ->name('chat.send');
     Route::get('/chat/{conversation}/pesan', [ConversationController::class, 'messages'])->name('chat.messages');
     Route::post('/chat/{conversation}/selesai', [ConversationController::class, 'complete'])->name('chat.complete');
+
+    // ===== Notifikasi (Backend 3) =====
+    Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifikasi/{id}', [NotificationController::class, 'show'])->name('notifications.show');
+    Route::post('/notifikasi/baca-semua', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])
