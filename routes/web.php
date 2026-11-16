@@ -8,11 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 // Halaman utama
-Route::get('/', function () {
-    return Auth::check()
-        ? redirect()->route('dashboard')
-        : redirect()->route('login');
-})->name('home');
+Route::get('/', [PageController::class, 'home'])->name('home');
 
 
 // ===== Preview Frontend 1 (data dummy, bisa dibuka tanpa login) =====

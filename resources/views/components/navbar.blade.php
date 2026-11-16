@@ -1,6 +1,6 @@
 @php
     $links = [
-        ['Beranda', route('home'), request()->routeIs('home')],
+        ['Beranda', route('beranda'), request()->routeIs('beranda')],
         ['Butuh Jasa', route('butuh.index'), request()->routeIs('butuh.*')],
         ['Menyediakan Jasa', route('sedia.index'), request()->routeIs('sedia.*')],
     ];
@@ -9,7 +9,7 @@
 @endphp
 <header class="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur">
     <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <a href="{{ route('home') }}" class="text-xl font-bold text-indigo-600">Bantuin</a>
+        <a href="{{ route('beranda') }}" class="brand-font text-xl font-extrabold text-emerald-800">Bantuin<span class="text-orange-500">.</span></a>
 
         <ul class="hidden items-center gap-6 md:flex">
             @foreach ($links as [$label, $url, $active])
