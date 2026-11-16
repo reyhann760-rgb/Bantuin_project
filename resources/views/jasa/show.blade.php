@@ -35,10 +35,34 @@
                 <div class="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-600 font-bold text-white">{{ strtoupper(substr($item->pengguna, 0, 1)) }}</div>
                 <p class="font-semibold">{{ $item->pengguna }}</p>
             </div>
-            {{-- Tombol ini akan diarahkan ke halaman chat (Frontend 2) --}}
-            <a href="#" class="mt-5 block rounded-lg bg-indigo-600 py-3 text-center text-sm font-semibold text-white hover:bg-indigo-700">
-                {{ $isButuh ? 'Tawarkan Jasa / Chat' : 'Pesan / Chat' }}
-            </a>
+            {{-- Tombol ini diarahkan ke halaman chat --}}
+            @auth
+                @if($isButuh && auth()->user()->role === 'provider')
+                    <form action="{{ route('chat.store') }}" method="POST" class="mt-5">
+                        @csrf
+                        <input type="hidden" name="service_request_id" value="{{ $item->id }}">
+                        <button type="submit" class="w-full rounded-lg bg-indigo-600 py-3 text-center text-sm font-semibold text-white hover:bg-indigo-700 cursor-pointer">
+                            Tawarkan Jasa / Chat
+                        </button>
+                    </form>
+                @elseif(!$isButuh && auth()->user()->role === 'customer')
+                    <form action="{{ route('chat.store') }}" method="POST" class="mt-5">
+                        @csrf
+                        <input type="hidden" name="service_offer_id" value="{{ $item->id }}">
+                        <button type="submit" class="w-full rounded-lg bg-indigo-600 py-3 text-center text-sm font-semibold text-white hover:bg-indigo-700 cursor-pointer">
+                            Pesan / Chat
+                        </button>
+                    </form>
+                @else
+                    <div class="mt-5 text-center text-xs text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                        {{ $isButuh ? 'Hanya penyedia jasa yang dapat menawarkan bantuan.' : 'Hanya pelanggan yang dapat memesan jasa ini.' }}
+                    </div>
+                @endif
+            @else
+                <a href="{{ route('login') }}" class="mt-5 block rounded-lg bg-indigo-600 py-3 text-center text-sm font-semibold text-white hover:bg-indigo-700">
+                    Masuk untuk Chat
+                </a>
+            @endauth
         </aside>
     </div>
 

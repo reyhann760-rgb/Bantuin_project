@@ -127,6 +127,8 @@
                 <a href="{{ route('register') }}">Register</a>
             @else
                 <a href="{{ route('dashboard') }}">Dashboard</a>
+                <a href="{{ route('chat.index') }}">Chat</a>
+                <a href="{{ route('notifications.index') }}">Notifikasi</a>
 
                 <form class="logout-form"
                       action="{{ route('logout') }}"
