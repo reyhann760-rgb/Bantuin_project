@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ServiceOfferController;
 use App\Http\Controllers\ServiceRequestController;
@@ -104,6 +105,16 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/service-offers/{serviceOffer}', [ServiceOfferController::class, 'show'])
         ->name('service-offers.show');
+
+    // ===== Chat & Percakapan (Backend 3) =====
+    Route::get('/chat', [ConversationController::class, 'index'])->name('chat.index');
+    Route::post('/chat', [ConversationController::class, 'store'])->name('chat.store');
+    Route::get('/chat/{conversation}', [ConversationController::class, 'show'])->name('chat.show');
+    Route::post('/chat/{conversation}/pesan', [ConversationController::class, 'sendMessage'])
+        ->middleware('throttle:30,1')
+        ->name('chat.send');
+    Route::get('/chat/{conversation}/pesan', [ConversationController::class, 'messages'])->name('chat.messages');
+    Route::post('/chat/{conversation}/selesai', [ConversationController::class, 'complete'])->name('chat.complete');
 
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])

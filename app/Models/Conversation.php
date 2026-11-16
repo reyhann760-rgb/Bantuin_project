@@ -61,4 +61,48 @@ class Conversation extends Model
     {
         return $this->hasMany(Review::class, 'conversation_id');
     }
+
+    /**
+     * Check if a given user is a participant of this conversation.
+     */
+    public function hasParticipant(User|int $user): bool
+    {
+        $userId = $user instanceof User ? $user->id : (int) $user;
+        return $this->customer_id === $userId || $this->provider_id === $userId;
+    }
+
+    /**
+     * Get the other participant in this conversation.
+     */
+    public function getOtherParticipant(User|int $user): ?User
+    {
+        $userId = $user instanceof User ? $user->id : (int) $user;
+
+        if ($this->customer_id === $userId) {
+            return $this->provider;
+        }
+
+        if ($this->provider_id === $userId) {
+            return $this->customer;
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if this conversation has been completed.
+     */
+    public function isCompleted(): bool
+    {
+        return $this->completed_at !== null;
+    }
+
+    /**
+     * Check if a user has reviewed this conversation.
+     */
+    public function hasReviewedBy(User|int $user): bool
+    {
+        $userId = $user instanceof User ? $user->id : (int) $user;
+        return $this->reviews()->where('reviewer_id', $userId)->exists();
+    }
 }
