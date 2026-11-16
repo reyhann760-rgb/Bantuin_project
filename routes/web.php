@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ServiceOfferController;
 use App\Http\Controllers\ServiceRequestController;
 use Illuminate\Support\Facades\Auth;
@@ -116,6 +117,7 @@ Route::middleware('auth')->group(function () {
         ->name('chat.send');
     Route::get('/chat/{conversation}/pesan', [ConversationController::class, 'messages'])->name('chat.messages');
     Route::post('/chat/{conversation}/selesai', [ConversationController::class, 'complete'])->name('chat.complete');
+    Route::post('/chat/{conversation}/ulasan', [ReviewController::class, 'store'])->name('chat.review');
 
     // ===== Notifikasi (Backend 3) =====
     Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications.index');

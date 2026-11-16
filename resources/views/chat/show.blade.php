@@ -60,6 +60,9 @@
         </div>
     @endif
 
+    {{-- Form / Info Ulasan (Review) --}}
+    @include('chat._review-form')
+
     {{-- Area Pesan --}}
     <div id="messages-container" class="bg-gray-50 border border-gray-200 p-4 h-[420px] overflow-y-auto flex flex-col gap-3">
         @forelse($conversation->messages as $msg)
