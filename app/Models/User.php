@@ -14,9 +14,11 @@ use Illuminate\Notifications\Notifiable;
     'name',
     'email',
     'password',
+    'role',
     'phone',
     'avatar',
     'bio',
+    'city',
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
@@ -60,5 +62,15 @@ class User extends Authenticatable
     public function sentMessages(): HasMany
     {
         return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    public function reviewsWritten(): HasMany
+    {
+        return $this->hasMany(Review::class, 'reviewer_id');
+    }
+
+    public function reviewsReceived(): HasMany
+    {
+        return $this->hasMany(Review::class, 'reviewee_id');
     }
 }
