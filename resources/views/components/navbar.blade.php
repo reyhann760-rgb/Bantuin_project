@@ -6,6 +6,14 @@
     ];
     $login = Route::has('login') ? route('login') : '#';
     $register = Route::has('register') ? route('register') : '#';
+
+    // Tombol buat form sesuai role (customer / provider)
+    $role = auth()->check() ? auth()->user()->role : null;
+    $cta = match ($role) {
+        'customer' => ['+ Butuh Jasa', route('service-requests.create')],
+        'provider' => ['+ Menyediakan Jasa', route('service-offers.create')],
+        default => null,
+    };
 @endphp
 <header class="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur">
     <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
@@ -19,6 +27,9 @@
 
         <div class="hidden items-center gap-3 md:flex">
             @auth
+                @if ($cta)
+                    <a href="{{ $cta[1] }}" class="rounded-lg border border-emerald-600 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50">{{ $cta[0] }}</a>
+                @endif
                 <a href="{{ route('chat.index') }}" class="text-sm font-medium text-slate-700 hover:text-indigo-600">Chat</a>
                 <a href="{{ route('notifications.index') }}" class="text-sm font-medium text-slate-700 hover:text-indigo-600">Notifikasi</a>
                 <a href="{{ route('dashboard') }}" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Dashboard</a>
@@ -39,6 +50,11 @@
             @foreach ($links as [$label, $url, $active])
                 <li><a href="{{ $url }}" class="block rounded-lg px-3 py-2 text-sm font-medium {{ $active ? 'bg-indigo-50 text-indigo-600' : 'text-slate-700' }}">{{ $label }}</a></li>
             @endforeach
+            @auth
+                @if ($cta)
+                    <li><a href="{{ $cta[1] }}" class="block rounded-lg border border-emerald-600 px-3 py-2 text-center text-sm font-semibold text-emerald-700">{{ $cta[0] }}</a></li>
+                @endif
+            @endauth
             <li class="flex gap-2 pt-2">
                 @auth
                     <a href="{{ route('chat.index') }}" class="flex-1 rounded-lg border border-slate-300 py-2 text-center text-sm font-medium">Chat</a>
