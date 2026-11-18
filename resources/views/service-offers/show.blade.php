@@ -1,4 +1,3 @@
-{{-- Frontend 2: detail Menyediakan Jasa. Nama route & variabel tidak diubah. --}}
 @extends('layouts.marketplace')
 
 @section('title', $serviceOffer->title)
@@ -24,7 +23,11 @@
 <div class="mx-auto max-w-6xl px-4 py-8">
     <a href="{{ $isOwner ? route('service-offers.mine') : route('service-offers.index') }}" class="text-sm text-indigo-600 hover:underline">&larr; {{ $isOwner ? 'Kembali ke penawaran saya' : 'Kembali ke daftar' }}</a>
 
-    <div class="mt-4"><x-flash /></div>
+    <div class="mt-4">@foreach (['success' => 'border-emerald-200 bg-emerald-50 text-emerald-800', 'error' => 'border-red-200 bg-red-50 text-red-700', 'info' => 'border-indigo-200 bg-indigo-50 text-indigo-800'] as $flashKey => $flashClass)
+@if (session($flashKey))
+<div class="mb-4 rounded-xl border p-4 text-sm {{ $flashClass }}" role="{{ $flashKey === 'error' ? 'alert' : 'status' }}">{{ session($flashKey) }}</div>
+@endif
+@endforeach</div>
 
     <div class="grid gap-6 lg:grid-cols-3">
 
