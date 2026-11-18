@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ServiceOfferRequest;
 use App\Models\Category;
 use App\Models\ServiceOffer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class ServiceOfferController extends Controller
 {
@@ -44,13 +46,17 @@ class ServiceOfferController extends Controller
 
     public function create()
     {
+        Gate::authorize('create', ServiceOffer::class);
+
         $categories = Category::all();
         return view('service-offers.create', compact('categories'));
     }
 
-    public function store(Request $request)
+    public function store(ServiceOfferRequest $request)
     {
-        $offer = $request->user()->serviceOffers()->create($this->validated($request));
+        Gate::authorize('create', ServiceOffer::class);
+
+        $offer = $request->user()->serviceOffers()->create($request->validated());
 
         return redirect()
             ->route('service-offers.show', $offer)
@@ -66,22 +72,18 @@ class ServiceOfferController extends Controller
 
     public function edit(ServiceOffer $serviceOffer)
     {
-        $this->authorizeOwner($serviceOffer);
+        Gate::authorize('update', $serviceOffer);
+
         $categories = Category::all();
 
         return view('service-offers.edit', compact('serviceOffer', 'categories'));
     }
 
-    public function update(Request $request, ServiceOffer $serviceOffer)
+    public function update(ServiceOfferRequest $request, ServiceOffer $serviceOffer)
     {
-        $this->authorizeOwner($serviceOffer);
+        Gate::authorize('update', $serviceOffer);
 
-        $validated = $this->validated($request);
-        $validated['status'] = $request->validate([
-            'status' => ['required', 'in:' . implode(',', self::STATUSES)],
-        ])['status'];
-
-        $serviceOffer->update($validated);
+        $serviceOffer->update($request->validated());
 
         return redirect()
             ->route('service-offers.show', $serviceOffer)
@@ -90,35 +92,12 @@ class ServiceOfferController extends Controller
 
     public function destroy(ServiceOffer $serviceOffer)
     {
-        $this->authorizeOwner($serviceOffer);
+        Gate::authorize('delete', $serviceOffer);
 
         $serviceOffer->delete();
 
         return redirect()
             ->route('service-offers.mine')
             ->with('success', 'Penawaran jasa berhasil dihapus.');
-    }
-
-    private function authorizeOwner(ServiceOffer $serviceOffer): void
-    {
-        abort_if(
-            $serviceOffer->provider_id !== Auth::id(),
-            403,
-            'Kamu bukan pemilik penawaran ini.'
-        );
-    }
-
-    private function validated(Request $request): array
-    {
-        return $request->validate([
-            'title'         => ['required', 'string', 'max:255'],
-            'description'   => ['required', 'string', 'min:20'],
-            'category_id'   => ['nullable', 'exists:categories,id'],
-            'price'         => ['nullable', 'numeric', 'min:0'],
-            'price_type'    => ['nullable', 'in:fixed,hourly,negotiable'],
-            'work_mode'     => ['nullable', 'in:online,onsite,hybrid'],
-            'location'      => ['nullable', 'string', 'max:255'],
-            'portfolio_url' => ['nullable', 'url', 'max:255'],
-        ]);
     }
 }

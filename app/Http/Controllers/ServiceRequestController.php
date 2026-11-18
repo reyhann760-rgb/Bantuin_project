@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ServiceRequestRequest;
 use App\Models\Category;
 use App\Models\ServiceRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class ServiceRequestController extends Controller
 {
@@ -46,15 +48,17 @@ class ServiceRequestController extends Controller
 
     public function create()
     {
+        Gate::authorize('create', ServiceRequest::class);
+
         $categories = Category::all();
         return view('service-requests.create', compact('categories'));
     }
 
-    public function store(Request $request)
+    public function store(ServiceRequestRequest $request)
     {
-        $validated = $this->validated($request);
+        Gate::authorize('create', ServiceRequest::class);
 
-        $serviceRequest = $request->user()->serviceRequests()->create($validated);
+        $serviceRequest = $request->user()->serviceRequests()->create($request->validated());
 
         return redirect()
             ->route('service-requests.show', $serviceRequest)
@@ -70,22 +74,18 @@ class ServiceRequestController extends Controller
 
     public function edit(ServiceRequest $serviceRequest)
     {
-        $this->authorizeOwner($serviceRequest);
+        Gate::authorize('update', $serviceRequest);
+
         $categories = Category::all();
 
         return view('service-requests.edit', compact('serviceRequest', 'categories'));
     }
 
-    public function update(Request $request, ServiceRequest $serviceRequest)
+    public function update(ServiceRequestRequest $request, ServiceRequest $serviceRequest)
     {
-        $this->authorizeOwner($serviceRequest);
+        Gate::authorize('update', $serviceRequest);
 
-        $validated = $this->validated($request);
-        $validated['status'] = $request->validate([
-            'status' => ['required', 'in:' . implode(',', self::STATUSES)],
-        ])['status'];
-
-        $serviceRequest->update($validated);
+        $serviceRequest->update($request->validated());
 
         return redirect()
             ->route('service-requests.show', $serviceRequest)
@@ -94,36 +94,12 @@ class ServiceRequestController extends Controller
 
     public function destroy(ServiceRequest $serviceRequest)
     {
-        $this->authorizeOwner($serviceRequest);
+        Gate::authorize('delete', $serviceRequest);
 
         $serviceRequest->delete();
 
         return redirect()
             ->route('service-requests.mine')
             ->with('success', 'Permintaan jasa berhasil dihapus.');
-    }
-
-    // Hanya pemilik yang boleh mengubah/menghapus
-    private function authorizeOwner(ServiceRequest $serviceRequest): void
-    {
-        abort_if(
-            $serviceRequest->customer_id !== Auth::id(),
-            403,
-            'Kamu bukan pemilik permintaan ini.'
-        );
-    }
-
-    private function validated(Request $request): array
-    {
-        return $request->validate([
-            'title'       => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string', 'min:20'],
-            'category_id' => ['nullable', 'exists:categories,id'],
-            'budget_min'  => ['nullable', 'numeric', 'min:0'],
-            'budget_max'  => ['nullable', 'numeric', 'min:0', 'gte:budget_min'],
-            'work_mode'   => ['nullable', 'in:online,onsite,hybrid'],
-            'location'    => ['nullable', 'string', 'max:255'],
-            'deadline'    => ['nullable', 'date', 'after_or_equal:today'],
-        ]);
     }
 }

@@ -6,6 +6,7 @@ use App\Models\Conversation;
 use App\Models\ServiceOffer;
 use App\Models\ServiceRequest;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class ConversationStarter
@@ -26,32 +27,34 @@ class ConversationStarter
      */
     public function start(User $user, array $data): Conversation
     {
-        if ($user->role === 'admin') {
-            throw ValidationException::withMessages([
-                'user' => ['Admin tidak diizinkan untuk memulai percakapan.'],
-            ]);
-        }
+        return DB::transaction(function () use ($user, $data) {
+            if ($user->role === 'admin') {
+                throw ValidationException::withMessages([
+                    'user' => ['Admin tidak diizinkan untuk memulai percakapan.'],
+                ]);
+            }
 
-        $serviceRequestId = $data['service_request_id'] ?? null;
-        $serviceOfferId = $data['service_offer_id'] ?? null;
+            $serviceRequestId = $data['service_request_id'] ?? null;
+            $serviceOfferId = $data['service_offer_id'] ?? null;
 
-        if (!$serviceRequestId && !$serviceOfferId) {
-            throw ValidationException::withMessages([
-                'listing' => ['Percakapan harus dimulai dari Butuh Jasa atau Menyediakan Jasa.'],
-            ]);
-        }
+            if (!$serviceRequestId && !$serviceOfferId) {
+                throw ValidationException::withMessages([
+                    'listing' => ['Percakapan harus dimulai dari Butuh Jasa atau Menyediakan Jasa.'],
+                ]);
+            }
 
-        if ($serviceRequestId && $serviceOfferId) {
-            throw ValidationException::withMessages([
-                'listing' => ['Percakapan tidak boleh terhubung ke dua jenis listing sekaligus.'],
-            ]);
-        }
+            if ($serviceRequestId && $serviceOfferId) {
+                throw ValidationException::withMessages([
+                    'listing' => ['Percakapan tidak boleh terhubung ke dua jenis listing sekaligus.'],
+                ]);
+            }
 
-        if ($serviceRequestId) {
-            return $this->startFromRequest($user, (int) $serviceRequestId);
-        }
+            if ($serviceRequestId) {
+                return $this->startFromRequest($user, (int) $serviceRequestId);
+            }
 
-        return $this->startFromOffer($user, (int) $serviceOfferId);
+            return $this->startFromOffer($user, (int) $serviceOfferId);
+        });
     }
 
     protected function startFromRequest(User $user, int $requestId): Conversation

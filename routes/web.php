@@ -27,26 +27,8 @@ Route::get('/service-offers', [ServiceOfferController::class, 'index'])->name('s
 
 
 
-// Route untuk pengguna yang belum login
-Route::middleware('guest')->group(function () {
-
-    // Registrasi
-    Route::get('/register', [AuthController::class, 'showRegister'])
-        ->name('register');
-
-    Route::post('/register', [AuthController::class, 'register'])
-        ->name('register.store');
-
-    // Login
-    Route::get('/login', [AuthController::class, 'showLogin'])
-        ->name('login');
-
-    Route::post('/login', [AuthController::class, 'login'])
-        ->middleware('throttle:5,1')
-        ->name('login.store');
-
-});
-
+// ===== Pemisahan Route Autentikasi (routes/auth.php) =====
+require __DIR__.'/auth.php';
 
 // Route untuk pengguna yang sudah login
 Route::middleware('auth')->group(function () {
@@ -78,6 +60,10 @@ Route::middleware('auth')->group(function () {
             ->name('service-requests.edit');
         Route::put('/service-requests/{serviceRequest}', [ServiceRequestController::class, 'update'])
             ->name('service-requests.update');
+    });
+
+    // Hapus kebutuhan jasa (customer pemilik atau admin)
+    Route::middleware('role:customer,admin')->group(function () {
         Route::delete('/service-requests/{serviceRequest}', [ServiceRequestController::class, 'destroy'])
             ->name('service-requests.destroy');
     });
@@ -95,6 +81,10 @@ Route::middleware('auth')->group(function () {
             ->name('service-offers.edit');
         Route::put('/service-offers/{serviceOffer}', [ServiceOfferController::class, 'update'])
             ->name('service-offers.update');
+    });
+
+    // Hapus penawaran jasa (provider pemilik atau admin)
+    Route::middleware('role:provider,admin')->group(function () {
         Route::delete('/service-offers/{serviceOffer}', [ServiceOfferController::class, 'destroy'])
             ->name('service-offers.destroy');
     });
@@ -128,10 +118,6 @@ Route::middleware('auth')->group(function () {
         Route::delete('/kategori/{category}', [AdminCategoryController::class, 'destroy'])->name('categories.destroy');
     });
 
-    // Logout
-    Route::post('/logout', [AuthController::class, 'logout'])
-        ->name('logout');
-
 });
 
 // Profil Publik Pengguna (dapat dilihat publik/tamu)
@@ -143,4 +129,13 @@ Route::get('/butuh-jasa/{serviceRequest}', [ServiceRequestController::class, 'sh
 
 Route::get('/service-offers/{serviceOffer}', [ServiceOfferController::class, 'show'])->name('service-offers.show');
 Route::get('/menyediakan-jasa/{serviceOffer}', [ServiceOfferController::class, 'show'])->name('sedia.show');
+
+// Global Route Constraints untuk parameter ID numerik
+Route::pattern('id', '[0-9]+');
+Route::pattern('serviceRequest', '[0-9]+');
+Route::pattern('serviceOffer', '[0-9]+');
+Route::pattern('conversation', '[0-9]+');
+Route::pattern('category', '[0-9]+');
+Route::pattern('user', '[0-9]+');
+
 

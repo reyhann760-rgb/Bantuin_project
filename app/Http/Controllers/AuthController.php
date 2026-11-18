@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 class AuthController extends Controller
@@ -18,32 +19,9 @@ class AuthController extends Controller
     }
 
     // Memproses registrasi pengguna
-    public function register(Request $request): RedirectResponse
+    public function register(RegisterRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-
-            'email' => [
-                'required',
-                'string',
-                'email',
-                'max:255',
-                'unique:users,email',
-            ],
-
-            'phone' => ['nullable', 'string', 'max:20'],
-
-            'role' => [
-                'required',
-                'in:customer,provider',
-            ],
-
-            'password' => [
-                'required',
-                'confirmed',
-                Password::min(8),
-            ],
-        ]);
+        $validated = $request->validated();
 
         // Membuat akun pengguna baru
         $user = new User();
@@ -74,12 +52,9 @@ class AuthController extends Controller
     }
 
     // Memproses login pengguna
-    public function login(Request $request): RedirectResponse
+    public function login(LoginRequest $request): RedirectResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-        ]);
+        $credentials = $request->validated();
 
         if (Auth::attempt(
             $credentials,
