@@ -51,6 +51,9 @@
             Kamu dapat mencari jasa dan membuat kebutuhan jasa.
         </p>
 
+        <p><a class="button" href="{{ route('service-requests.create') }}">+ Buat Butuh Jasa</a></p>
+        <p><a class="button" href="{{ route('service-requests.mine') }}" style="background: #475569;">Permintaan Saya</a></p>
+
     @elseif(auth()->user()->role === 'provider')
 
         <h3>Dashboard Penyedia Jasa</h3>
@@ -58,6 +61,9 @@
         <p>
             Kamu dapat menawarkan jasa dan menerima permintaan layanan.
         </p>
+
+        <p><a class="button" href="{{ route('service-offers.create') }}">+ Buat Menyediakan Jasa</a></p>
+        <p><a class="button" href="{{ route('service-offers.mine') }}" style="background: #475569;">Penawaran Saya</a></p>
 
     @endif
 

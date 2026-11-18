@@ -1,49 +1,65 @@
-{{-- PLACEHOLDER dari Backend 2: tampilan polos. Frontend silakan ganti isi file ini (nama file, variabel, nama field, dan nama route jangan diubah). --}}
-@extends('layouts.app')
+{{-- Frontend 2: halaman Edit Butuh Jasa. Nama route & field tidak diubah. --}}
+@extends('layouts.marketplace')
 
-@section('title', 'Edit Butuh Jasa - Bantuin')
+@section('title', 'Edit Butuh Jasa')
 
 @section('content')
+<section class="border-b border-slate-200 bg-white">
+    <div class="mx-auto max-w-3xl px-4 py-8">
+        <a href="{{ route('service-requests.show', $serviceRequest) }}" class="text-sm font-medium text-indigo-600 hover:underline">&larr; Kembali</a>
+        <h1 class="mt-3 text-2xl font-bold md:text-3xl">Edit Butuh Jasa</h1>
+        <p class="mt-1 text-slate-500">Perbarui detail permintaan atau ubah statusnya.</p>
+    </div>
+</section>
 
-<div class="card">
+<section class="mx-auto max-w-3xl px-4 py-8">
 
-    <h1>Edit Butuh Jasa</h1>
+    @if ($errors->any())
+        <div class="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <p class="font-semibold">Periksa kembali isian kamu:</p>
+            <ul class="mt-1 list-disc space-y-0.5 pl-5">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-    <form action="{{ route('service-requests.update', $serviceRequest) }}" method="POST">
-
+    <form action="{{ route('service-requests.update', $serviceRequest) }}" method="POST"
+          class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
         @csrf
         @method('PUT')
 
         @include('service-requests._form')
 
-        <div class="form-group">
-            <label>Status</label>
-            <select name="status">
-                @foreach(['open', 'in_progress', 'completed', 'cancelled'] as $status)
-                    <option value="{{ $status }}" @selected(old('status', $serviceRequest->status) === $status)>{{ $status }}</option>
+        <div class="mt-5 sm:max-w-xs">
+            <label for="status" class="mb-1.5 block text-sm font-semibold text-slate-700">Status</label>
+            <select id="status" name="status"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200">
+                @foreach (['open' => 'Open', 'in_progress' => 'Sedang dikerjakan', 'completed' => 'Selesai', 'cancelled' => 'Dibatalkan'] as $value => $label)
+                    <option value="{{ $value }}" @selected(old('status', $serviceRequest->status) === $value)>{{ $label }}</option>
                 @endforeach
             </select>
         </div>
 
-        <button type="submit">Simpan Perubahan</button>
-
+        <div class="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <a href="{{ route('service-requests.show', $serviceRequest) }}"
+               class="rounded-lg border border-slate-300 px-5 py-2.5 text-center text-sm font-medium text-slate-700 hover:bg-slate-50">Batal</a>
+            <button type="submit"
+                    class="rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700">Simpan Perubahan</button>
+        </div>
     </form>
 
-    <hr>
-
-    <form action="{{ route('service-requests.destroy', $serviceRequest) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
-
+    <form action="{{ route('service-requests.destroy', $serviceRequest) }}" method="POST"
+          onsubmit="return confirm('Yakin ingin menghapus permintaan ini?')"
+          class="mt-6 flex items-center justify-between rounded-2xl border border-red-200 bg-red-50 p-5">
         @csrf
         @method('DELETE')
-
-        <button type="submit" style="background: #dc2626;">Hapus</button>
-
+        <div>
+            <p class="text-sm font-semibold text-red-700">Hapus permintaan</p>
+            <p class="text-xs text-red-600">Tindakan ini tidak bisa dibatalkan.</p>
+        </div>
+        <button type="submit" class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700">Hapus</button>
     </form>
-
-    <div class="link">
-        <a href="{{ route('service-requests.show', $serviceRequest) }}">Kembali</a>
-    </div>
-
-</div>
-
+</section>
 @endsection

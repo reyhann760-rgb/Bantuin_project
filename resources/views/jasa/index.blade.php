@@ -2,11 +2,30 @@
 @section('title', $judulHalaman)
 
 @section('content')
-@php $routeName = $type === 'butuh' ? 'butuh.index' : 'sedia.index'; @endphp
+@php
+    $routeName = $type === 'butuh' ? 'butuh.index' : 'sedia.index';
+
+    // Tombol buat form: hanya tampil untuk role yang berhak
+    $needRole = $type === 'butuh' ? 'customer' : 'provider';
+    $ctaLabel = $type === 'butuh' ? '+ Buat Butuh Jasa' : '+ Tawarkan Jasa';
+    $ctaUrl   = $type === 'butuh' ? route('service-requests.create') : route('service-offers.create');
+@endphp
 <section class="border-b border-slate-200 bg-white">
     <div class="mx-auto max-w-6xl px-4 py-8">
-        <h1 class="text-2xl font-bold md:text-3xl">{{ $judulHalaman }}</h1>
-        <p class="mt-1 text-slate-500">{{ $subjudul }}</p>
+        <div class="flex flex-wrap items-start justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-bold md:text-3xl">{{ $judulHalaman }}</h1>
+                <p class="mt-1 text-slate-500">{{ $subjudul }}</p>
+            </div>
+
+            @guest
+                <a href="{{ route('login') }}" class="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700">{{ $ctaLabel }}</a>
+            @else
+                @if (auth()->user()->role === $needRole)
+                    <a href="{{ $ctaUrl }}" class="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700">{{ $ctaLabel }}</a>
+                @endif
+            @endguest
+        </div>
 
         <form action="{{ route($routeName) }}" method="GET" class="mt-5 grid gap-2 sm:grid-cols-[1fr_200px_auto]">
             <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari judul atau deskripsi..."
