@@ -1,39 +1,85 @@
-{{-- PLACEHOLDER dari Backend 2: tampilan polos. Frontend silakan ganti isi file ini (nama file, variabel, nama field, dan nama route jangan diubah). --}}
-@extends('layouts.app')
+{{-- Frontend 2: detail Butuh Jasa. Nama route & variabel tidak diubah. --}}
+@extends('layouts.marketplace')
 
-@section('title', $serviceRequest->title . ' - Bantuin')
+@section('title', $serviceRequest->title)
 
 @section('content')
+@php
+    $statusMap = [
+        'open'        => ['Open', 'bg-emerald-100 text-emerald-700'],
+        'in_progress' => ['Sedang dikerjakan', 'bg-amber-100 text-amber-700'],
+        'completed'   => ['Selesai', 'bg-indigo-100 text-indigo-700'],
+        'cancelled'   => ['Dibatalkan', 'bg-slate-200 text-slate-600'],
+    ];
+    [$statusLabel, $statusClass] = $statusMap[$serviceRequest->status] ?? [$serviceRequest->status, 'bg-slate-100 text-slate-600'];
+    $modeMap = ['online' => 'Online', 'onsite' => 'Onsite (tatap muka)', 'hybrid' => 'Hybrid'];
 
-<div class="card">
+    $fmt = fn ($n) => 'Rp ' . number_format($n, 0, ',', '.');
+    $min = $serviceRequest->budget_min;
+    $max = $serviceRequest->budget_max;
+    if ($min !== null && $max !== null)      { $budget = $fmt($min) . ' – ' . $fmt($max); }
+    elseif ($min !== null)                   { $budget = 'Mulai ' . $fmt($min); }
+    elseif ($max !== null)                   { $budget = 'Hingga ' . $fmt($max); }
+    else                                     { $budget = 'Belum ditentukan'; }
 
-    <h1>{{ $serviceRequest->title }}</h1>
+    $deadline = $serviceRequest->deadline
+        ? \Carbon\Carbon::parse($serviceRequest->deadline)->locale('id')->translatedFormat('d F Y')
+        : '-';
+    $isOwner = auth()->id() === $serviceRequest->customer_id;
+@endphp
 
-    <p>Oleh <strong>{{ $serviceRequest->customer->name }}</strong> | Status: {{ $serviceRequest->status }}</p>
+<div class="mx-auto max-w-6xl px-4 py-8">
+    <a href="{{ $isOwner ? route('service-requests.mine') : route('service-requests.index') }}" class="text-sm text-indigo-600 hover:underline">&larr; {{ $isOwner ? 'Kembali ke permintaan saya' : 'Kembali ke daftar' }}</a>
 
-    <p>{{ $serviceRequest->description }}</p>
+    <div class="mt-4"><x-flash /></div>
 
-    <hr>
+    <div class="grid gap-6 lg:grid-cols-3">
 
-    <p><strong>Budget:</strong> Rp {{ number_format($serviceRequest->budget_min ?? 0, 0, ',', '.') }} - Rp {{ number_format($serviceRequest->budget_max ?? 0, 0, ',', '.') }}</p>
-    <p><strong>Mode Kerja:</strong> {{ $serviceRequest->work_mode ?? '-' }}</p>
-    <p><strong>Lokasi:</strong> {{ $serviceRequest->location ?? '-' }}</p>
-    <p><strong>Deadline:</strong> {{ $serviceRequest->deadline ?? '-' }}</p>
+        {{-- Detail utama --}}
+        <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2">
+            <span class="rounded-full px-3 py-1 text-xs font-medium {{ $statusClass }}">{{ $statusLabel }}</span>
+            <h1 class="mt-3 text-2xl font-bold md:text-3xl">{{ $serviceRequest->title }}</h1>
+            <p class="mt-1 text-sm text-slate-400">Diposting {{ $serviceRequest->created_at->locale('id')->translatedFormat('d F Y') }}</p>
 
-    @if(auth()->id() === $serviceRequest->customer_id)
-        <a class="button" href="{{ route('service-requests.edit', $serviceRequest) }}">Edit</a>
-    @elseif(auth()->check() && auth()->user()->role === 'provider' && $serviceRequest->status === 'open')
-        <form action="{{ route('chat.store') }}" method="POST" style="margin-top: 15px;">
-            @csrf
-            <input type="hidden" name="service_request_id" value="{{ $serviceRequest->id }}">
-            <button type="submit" class="button" style="background: #16a34a;">Tawarkan Jasa / Mulai Chat</button>
-        </form>
-    @endif
+            <h2 class="mt-6 font-semibold">Deskripsi</h2>
+            <p class="mt-2 whitespace-pre-line leading-relaxed text-slate-600">{{ $serviceRequest->description }}</p>
 
-    <div class="link">
-        <a href="{{ route('service-requests.index') }}">Kembali ke daftar</a>
+            <dl class="mt-6 grid grid-cols-1 gap-4 rounded-xl bg-slate-50 p-4 text-sm sm:grid-cols-2">
+                <div><dt class="text-slate-400">Anggaran</dt><dd class="font-semibold">{{ $budget }}</dd></div>
+                <div><dt class="text-slate-400">Deadline</dt><dd class="font-semibold">{{ $deadline }}</dd></div>
+                <div><dt class="text-slate-400">Mode kerja</dt><dd class="font-semibold">{{ $modeMap[$serviceRequest->work_mode] ?? '-' }}</dd></div>
+                <div><dt class="text-slate-400">Lokasi</dt><dd class="font-semibold">{{ $serviceRequest->location ?? '-' }}</dd></div>
+            </dl>
+        </article>
+
+        {{-- Sidebar --}}
+        <aside class="h-fit space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="flex h-11 w-11 items-center justify-center rounded-full bg-indigo-100 font-bold text-indigo-700">
+                    {{ strtoupper(mb_substr($serviceRequest->customer->name, 0, 1)) }}
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400">Diminta oleh</p>
+                    <p class="font-semibold">{{ $serviceRequest->customer->name }}</p>
+                </div>
+            </div>
+
+            @if ($serviceRequest->customer->bio)
+                <p class="text-sm text-slate-500">{{ $serviceRequest->customer->bio }}</p>
+            @endif
+
+            @if ($isOwner)
+                <a href="{{ route('service-requests.edit', $serviceRequest) }}"
+                   class="block rounded-lg bg-indigo-600 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-indigo-700">Edit Permintaan</a>
+            @elseif (auth()->check() && auth()->user()->role === 'provider' && $serviceRequest->status === 'open')
+                <form action="{{ route('chat.store') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="service_request_id" value="{{ $serviceRequest->id }}">
+                    <button type="submit" class="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700">Tawarkan Jasa / Mulai Chat</button>
+                </form>
+            @endif
+        </aside>
+
     </div>
-
 </div>
-
 @endsection
