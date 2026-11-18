@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ServiceOfferController;
 use App\Http\Controllers\ServiceRequestController;
 use Illuminate\Support\Facades\Auth;
@@ -104,6 +107,22 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/service-offers/{serviceOffer}', [ServiceOfferController::class, 'show'])
         ->name('service-offers.show');
+
+    // ===== Chat & Percakapan (Backend 3) =====
+    Route::get('/chat', [ConversationController::class, 'index'])->name('chat.index');
+    Route::post('/chat', [ConversationController::class, 'store'])->name('chat.store');
+    Route::get('/chat/{conversation}', [ConversationController::class, 'show'])->name('chat.show');
+    Route::post('/chat/{conversation}/pesan', [ConversationController::class, 'sendMessage'])
+        ->middleware('throttle:30,1')
+        ->name('chat.send');
+    Route::get('/chat/{conversation}/pesan', [ConversationController::class, 'messages'])->name('chat.messages');
+    Route::post('/chat/{conversation}/selesai', [ConversationController::class, 'complete'])->name('chat.complete');
+    Route::post('/chat/{conversation}/ulasan', [ReviewController::class, 'store'])->name('chat.review');
+
+    // ===== Notifikasi (Backend 3) =====
+    Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifikasi/{id}', [NotificationController::class, 'show'])->name('notifications.show');
+    Route::post('/notifikasi/baca-semua', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])

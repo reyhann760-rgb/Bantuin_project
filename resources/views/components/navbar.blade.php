@@ -18,8 +18,14 @@
         </ul>
 
         <div class="hidden items-center gap-3 md:flex">
-            <a href="{{ $login }}" class="text-sm font-medium text-slate-700 hover:text-indigo-600">Masuk</a>
-            <a href="{{ $register }}" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Daftar</a>
+            @auth
+                <a href="{{ route('chat.index') }}" class="text-sm font-medium text-slate-700 hover:text-indigo-600">Chat</a>
+                <a href="{{ route('notifications.index') }}" class="text-sm font-medium text-slate-700 hover:text-indigo-600">Notifikasi</a>
+                <a href="{{ route('dashboard') }}" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Dashboard</a>
+            @else
+                <a href="{{ $login }}" class="text-sm font-medium text-slate-700 hover:text-indigo-600">Masuk</a>
+                <a href="{{ $register }}" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Daftar</a>
+            @endauth
         </div>
 
         <button type="button" class="rounded-lg p-2 text-slate-700 hover:bg-slate-100 md:hidden" aria-label="Menu"
@@ -34,8 +40,14 @@
                 <li><a href="{{ $url }}" class="block rounded-lg px-3 py-2 text-sm font-medium {{ $active ? 'bg-indigo-50 text-indigo-600' : 'text-slate-700' }}">{{ $label }}</a></li>
             @endforeach
             <li class="flex gap-2 pt-2">
-                <a href="{{ $login }}" class="flex-1 rounded-lg border border-slate-300 py-2 text-center text-sm font-medium">Masuk</a>
-                <a href="{{ $register }}" class="flex-1 rounded-lg bg-indigo-600 py-2 text-center text-sm font-semibold text-white">Daftar</a>
+                @auth
+                    <a href="{{ route('chat.index') }}" class="flex-1 rounded-lg border border-slate-300 py-2 text-center text-sm font-medium">Chat</a>
+                    <a href="{{ route('notifications.index') }}" class="flex-1 rounded-lg border border-slate-300 py-2 text-center text-sm font-medium">Notifikasi</a>
+                    <a href="{{ route('dashboard') }}" class="flex-1 rounded-lg bg-indigo-600 py-2 text-center text-sm font-semibold text-white">Dashboard</a>
+                @else
+                    <a href="{{ $login }}" class="flex-1 rounded-lg border border-slate-300 py-2 text-center text-sm font-medium">Masuk</a>
+                    <a href="{{ $register }}" class="flex-1 rounded-lg bg-indigo-600 py-2 text-center text-sm font-semibold text-white">Daftar</a>
+                @endauth
             </li>
         </ul>
     </div>

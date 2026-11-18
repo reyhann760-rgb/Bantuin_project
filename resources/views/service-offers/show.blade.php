@@ -22,6 +22,12 @@
 
     @if(auth()->id() === $serviceOffer->provider_id)
         <a class="button" href="{{ route('service-offers.edit', $serviceOffer) }}">Edit</a>
+    @elseif(auth()->check() && auth()->user()->role === 'customer' && $serviceOffer->status === 'active')
+        <form action="{{ route('chat.store') }}" method="POST" style="margin-top: 15px;">
+            @csrf
+            <input type="hidden" name="service_offer_id" value="{{ $serviceOffer->id }}">
+            <button type="submit" class="button" style="background: #16a34a;">Mulai Chat / Pesan Jasa</button>
+        </form>
     @endif
 
     <div class="link">
