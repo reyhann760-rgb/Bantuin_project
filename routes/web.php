@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ServiceOfferController;
 use App\Http\Controllers\ServiceRequestController;
@@ -124,8 +125,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifikasi/{id}', [NotificationController::class, 'show'])->name('notifications.show');
     Route::post('/notifikasi/baca-semua', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 
+    // ===== Profil Pengguna =====
+    Route::get('/profil', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profil', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profil/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
 
 });
+
+// Profil Publik Pengguna (dapat dilihat publik/tamu)
+Route::get('/pengguna/{user}', [ProfileController::class, 'show'])->name('profile.show');
