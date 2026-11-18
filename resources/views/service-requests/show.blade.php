@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 {{-- Frontend 2: detail Butuh Jasa. Nama route & variabel tidak diubah. Struktur sama dengan service-offers/show. --}}
+=======
+{{-- Frontend 2: detail Butuh Jasa. Nama route & variabel tidak diubah. --}}
+>>>>>>> ad735df1ac60604aae56faa6d6c41fdcbfa005d1
 @extends('layouts.marketplace')
 
 @section('title', $serviceRequest->title)
@@ -6,14 +10,22 @@
 @section('content')
 @php
     $statusMap = [
+<<<<<<< HEAD
         'open'        => ['Terbuka', 'bg-emerald-100 text-emerald-700'],
         'in_progress' => ['Sedang dikerjakan', 'bg-amber-100 text-amber-700'],
         'completed'   => ['Selesai', 'bg-slate-200 text-slate-600'],
         'cancelled'   => ['Dibatalkan', 'bg-red-100 text-red-700'],
+=======
+        'open'        => ['Open', 'bg-emerald-100 text-emerald-700'],
+        'in_progress' => ['Sedang dikerjakan', 'bg-amber-100 text-amber-700'],
+        'completed'   => ['Selesai', 'bg-indigo-100 text-indigo-700'],
+        'cancelled'   => ['Dibatalkan', 'bg-slate-200 text-slate-600'],
+>>>>>>> ad735df1ac60604aae56faa6d6c41fdcbfa005d1
     ];
     [$statusLabel, $statusClass] = $statusMap[$serviceRequest->status] ?? [$serviceRequest->status, 'bg-slate-100 text-slate-600'];
     $modeMap = ['online' => 'Online', 'onsite' => 'Onsite (tatap muka)', 'hybrid' => 'Hybrid'];
 
+<<<<<<< HEAD
     $rupiah = fn ($v) => 'Rp ' . number_format($v, 0, ',', '.');
     $min = $serviceRequest->budget_min;
     $max = $serviceRequest->budget_max;
@@ -27,6 +39,18 @@
 
     $deadline = $serviceRequest->deadline
         ? \Illuminate\Support\Carbon::parse($serviceRequest->deadline)->locale('id')->translatedFormat('d F Y')
+=======
+    $fmt = fn ($n) => 'Rp ' . number_format($n, 0, ',', '.');
+    $min = $serviceRequest->budget_min;
+    $max = $serviceRequest->budget_max;
+    if ($min !== null && $max !== null)      { $budget = $fmt($min) . ' – ' . $fmt($max); }
+    elseif ($min !== null)                   { $budget = 'Mulai ' . $fmt($min); }
+    elseif ($max !== null)                   { $budget = 'Hingga ' . $fmt($max); }
+    else                                     { $budget = 'Belum ditentukan'; }
+
+    $deadline = $serviceRequest->deadline
+        ? \Carbon\Carbon::parse($serviceRequest->deadline)->locale('id')->translatedFormat('d F Y')
+>>>>>>> ad735df1ac60604aae56faa6d6c41fdcbfa005d1
         : '-';
     $isOwner = auth()->id() === $serviceRequest->customer_id;
 @endphp
@@ -34,11 +58,15 @@
 <div class="mx-auto max-w-6xl px-4 py-8">
     <a href="{{ $isOwner ? route('service-requests.mine') : route('service-requests.index') }}" class="text-sm text-indigo-600 hover:underline">&larr; {{ $isOwner ? 'Kembali ke permintaan saya' : 'Kembali ke daftar' }}</a>
 
+<<<<<<< HEAD
     <div class="mt-4">@foreach (['success' => 'border-emerald-200 bg-emerald-50 text-emerald-800', 'error' => 'border-red-200 bg-red-50 text-red-700', 'info' => 'border-indigo-200 bg-indigo-50 text-indigo-800'] as $flashKey => $flashClass)
 @if (session($flashKey))
 <div class="mb-4 rounded-xl border p-4 text-sm {{ $flashClass }}" role="{{ $flashKey === 'error' ? 'alert' : 'status' }}">{{ session($flashKey) }}</div>
 @endif
 @endforeach</div>
+=======
+    <div class="mt-4"><x-flash /></div>
+>>>>>>> ad735df1ac60604aae56faa6d6c41fdcbfa005d1
 
     <div class="grid gap-6 lg:grid-cols-3">
 
@@ -53,9 +81,15 @@
 
             <dl class="mt-6 grid grid-cols-1 gap-4 rounded-xl bg-slate-50 p-4 text-sm sm:grid-cols-2">
                 <div><dt class="text-slate-400">Anggaran</dt><dd class="font-semibold">{{ $budget }}</dd></div>
+<<<<<<< HEAD
                 <div><dt class="text-slate-400">Mode kerja</dt><dd class="font-semibold">{{ $modeMap[$serviceRequest->work_mode] ?? '-' }}</dd></div>
                 <div><dt class="text-slate-400">Lokasi</dt><dd class="font-semibold">{{ $serviceRequest->location ?? '-' }}</dd></div>
                 <div><dt class="text-slate-400">Deadline</dt><dd class="font-semibold">{{ $deadline }}</dd></div>
+=======
+                <div><dt class="text-slate-400">Deadline</dt><dd class="font-semibold">{{ $deadline }}</dd></div>
+                <div><dt class="text-slate-400">Mode kerja</dt><dd class="font-semibold">{{ $modeMap[$serviceRequest->work_mode] ?? '-' }}</dd></div>
+                <div><dt class="text-slate-400">Lokasi</dt><dd class="font-semibold">{{ $serviceRequest->location ?? '-' }}</dd></div>
+>>>>>>> ad735df1ac60604aae56faa6d6c41fdcbfa005d1
             </dl>
         </article>
 
@@ -89,4 +123,8 @@
 
     </div>
 </div>
+<<<<<<< HEAD
 @endsection
+=======
+@endsection
+>>>>>>> ad735df1ac60604aae56faa6d6c41fdcbfa005d1
