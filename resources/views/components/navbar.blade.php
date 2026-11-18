@@ -30,8 +30,12 @@
                 @if ($cta)
                     <a href="{{ $cta[1] }}" class="rounded-lg border border-emerald-600 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50">{{ $cta[0] }}</a>
                 @endif
+                @if(auth()->user()->role === 'admin')
+                    <a href="{{ route('admin.categories.index') }}" class="text-sm font-medium text-slate-700 hover:text-indigo-600">Kategori</a>
+                @endif
                 <a href="{{ route('chat.index') }}" class="text-sm font-medium text-slate-700 hover:text-indigo-600">Chat</a>
                 <a href="{{ route('notifications.index') }}" class="text-sm font-medium text-slate-700 hover:text-indigo-600">Notifikasi</a>
+                <a href="{{ route('profile.edit') }}" class="text-sm font-medium text-slate-700 hover:text-indigo-600">Profil</a>
                 <a href="{{ route('dashboard') }}" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Dashboard</a>
             @else
                 <a href="{{ $login }}" class="text-sm font-medium text-slate-700 hover:text-indigo-600">Masuk</a>
@@ -57,8 +61,12 @@
             @endauth
             <li class="flex gap-2 pt-2">
                 @auth
+                    @if(auth()->user()->role === 'admin')
+                        <a href="{{ route('admin.categories.index') }}" class="flex-1 rounded-lg border border-slate-300 py-2 text-center text-sm font-medium">Kategori</a>
+                    @endif
                     <a href="{{ route('chat.index') }}" class="flex-1 rounded-lg border border-slate-300 py-2 text-center text-sm font-medium">Chat</a>
                     <a href="{{ route('notifications.index') }}" class="flex-1 rounded-lg border border-slate-300 py-2 text-center text-sm font-medium">Notifikasi</a>
+                    <a href="{{ route('profile.edit') }}" class="flex-1 rounded-lg border border-slate-300 py-2 text-center text-sm font-medium">Profil</a>
                     <a href="{{ route('dashboard') }}" class="flex-1 rounded-lg bg-indigo-600 py-2 text-center text-sm font-semibold text-white">Dashboard</a>
                 @else
                     <a href="{{ $login }}" class="flex-1 rounded-lg border border-slate-300 py-2 text-center text-sm font-medium">Masuk</a>
