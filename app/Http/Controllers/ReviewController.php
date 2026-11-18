@@ -7,6 +7,7 @@ use App\Models\Review;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class ReviewController extends Controller
@@ -55,13 +56,15 @@ class ReviewController extends Controller
             'comment.max' => 'Komentar tidak boleh lebih dari 1000 karakter.',
         ]);
 
-        Review::create([
-            'conversation_id' => $conversation->id,
-            'reviewer_id' => $user->id,
-            'reviewee_id' => $conversation->provider_id,
-            'rating' => (int) $validated['rating'],
-            'comment' => $validated['comment'] ?? null,
-        ]);
+        $review = DB::transaction(function () use ($conversation, $user, $validated) {
+            return Review::create([
+                'conversation_id' => $conversation->id,
+                'reviewer_id' => $user->id,
+                'reviewee_id' => $conversation->provider_id,
+                'rating' => (int) $validated['rating'],
+                'comment' => $validated['comment'] ?? null,
+            ]);
+        });
 
         return redirect()->route('chat.show', $conversation)
             ->with('success', 'Terima kasih! Ulasan Anda berhasil disimpan.');

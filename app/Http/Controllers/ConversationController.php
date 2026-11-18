@@ -11,6 +11,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -71,11 +73,9 @@ class ConversationController extends Controller
      */
     public function show(Conversation $conversation): View
     {
-        $user = Auth::user();
+        Gate::authorize('view', $conversation);
 
-        if (!$conversation->hasParticipant($user)) {
-            abort(403, 'Anda bukan peserta percakapan ini.');
-        }
+        $user = Auth::user();
 
         // Mark unread messages sent by the other participant as read
         $conversation->messages()
@@ -105,11 +105,9 @@ class ConversationController extends Controller
      */
     public function sendMessage(Request $request, Conversation $conversation): RedirectResponse|JsonResponse
     {
-        $user = Auth::user();
+        Gate::authorize('sendMessage', $conversation);
 
-        if (!$conversation->hasParticipant($user)) {
-            abort(403, 'Anda bukan peserta percakapan ini.');
-        }
+        $user = Auth::user();
 
         $validated = $request->validate([
             'body' => 'required|string|max:2000',
@@ -198,25 +196,25 @@ class ConversationController extends Controller
      */
     public function complete(Conversation $conversation): RedirectResponse
     {
-        $user = Auth::user();
+        Gate::authorize('complete', $conversation);
 
-        if ($conversation->customer_id !== $user->id) {
-            abort(403, 'Hanya pelanggan yang dapat menandai percakapan ini selesai.');
-        }
+        $user = Auth::user();
 
         if ($conversation->isCompleted()) {
             return back()->with('info', 'Percakapan ini sudah ditandai selesai sebelumnya.');
         }
 
-        $conversation->update([
-            'completed_at' => now(),
-            'status' => 'completed',
-        ]);
+        DB::transaction(function () use ($conversation) {
+            $conversation->update([
+                'completed_at' => now(),
+                'status' => 'completed',
+            ]);
 
-        // If related to a ServiceRequest, mark status as closed
-        if ($conversation->service_request_id) {
-            ServiceRequest::where('id', $conversation->service_request_id)->update(['status' => 'closed']);
-        }
+            // Jika percakapan terhubung dengan ServiceRequest, ubah statusnya menjadi 'closed'
+            if ($conversation->service_request_id) {
+                ServiceRequest::where('id', $conversation->service_request_id)->update(['status' => 'closed']);
+            }
+        });
 
         return redirect()->route('chat.show', $conversation)
             ->with('success', 'Percakapan telah ditandai selesai. Anda sekarang dapat memberikan ulasan.');
