@@ -16,9 +16,16 @@
             @endif
         </div>
 
-        <form action="{{ route('service-offers.index') }}" method="GET" class="mt-5 grid gap-2 sm:grid-cols-[1fr_200px_auto]">
+        <form action="{{ route('service-offers.index') }}" method="GET" class="mt-5 grid gap-2 sm:grid-cols-[1fr_180px_180px_auto]">
             <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari judul atau deskripsi..." aria-label="Cari"
                    class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm placeholder-slate-400 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200">
+            <select name="category" aria-label="Kategori"
+                    class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200">
+                <option value="">Semua kategori</option>
+                @foreach ($categories as $cat)
+                    <option value="{{ $cat->id }}" @selected(request('category') == $cat->id || request('category') == $cat->slug)>{{ $cat->name }}</option>
+                @endforeach
+            </select>
             <select name="work_mode" aria-label="Mode kerja"
                     class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200">
                 <option value="">Semua mode kerja</option>
@@ -48,7 +55,7 @@
                     Data akan muncul di sini setelah ada yang membuatnya.
                 @endif
             </p>
-            @if (request()->hasAny(['q', 'work_mode']))
+            @if (request()->hasAny(['q', 'work_mode', 'category']))
                 <a href="{{ route('service-offers.index') }}" class="mt-4 inline-block text-sm font-medium text-indigo-600 hover:underline">Reset filter</a>
             @endif
         </div>
@@ -65,7 +72,11 @@
                 @endphp
                 <a href="{{ route('service-offers.show', $item) }}" class="group flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                     <div class="flex items-center justify-between gap-2">
-                        <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700">Menyediakan Jasa</span>
+                        @if ($item->category)
+                            <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">{{ $item->category->name }}</span>
+                        @else
+                            <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700">Menyediakan Jasa</span>
+                        @endif
                         @if ($item->work_mode)
                             <span class="text-xs text-slate-400">{{ $modeMap[$item->work_mode] ?? $item->work_mode }}</span>
                         @endif

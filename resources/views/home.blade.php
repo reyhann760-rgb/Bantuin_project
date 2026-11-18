@@ -47,6 +47,7 @@
     </div>
 </section>
 
+@if ($categories->isNotEmpty())
 <section class="border-y border-slate-200 bg-white">
     <div class="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
         <div class="flex flex-wrap items-end justify-between gap-4">
@@ -57,14 +58,15 @@
             <a href="{{ route('sedia.index') }}" class="text-sm font-bold text-emerald-800 hover:underline">Semua jasa <span aria-hidden="true">&rarr;</span></a>
         </div>
         <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            @foreach ($kategori as $k)
-                <a href="{{ route('sedia.index', ['kategori' => $k]) }}" class="group flex min-h-20 items-center justify-between gap-2 rounded-md border border-slate-200 bg-[#fbfcf9] px-4 py-3 text-sm font-bold text-slate-700 transition hover:border-emerald-700 hover:bg-emerald-50 hover:text-emerald-900">
-                    <span>{{ $k }}</span><span class="text-lg text-orange-500 transition group-hover:translate-x-1" aria-hidden="true">&rarr;</span>
+            @foreach ($categories as $cat)
+                <a href="{{ route('sedia.index', ['category' => $cat->slug ?: $cat->id]) }}" class="group flex min-h-20 items-center justify-between gap-2 rounded-md border border-slate-200 bg-[#fbfcf9] px-4 py-3 text-sm font-bold text-slate-700 transition hover:border-emerald-700 hover:bg-emerald-50 hover:text-emerald-900">
+                    <span>{{ $cat->name }}</span><span class="text-lg text-orange-500 transition group-hover:translate-x-1" aria-hidden="true">&rarr;</span>
                 </a>
             @endforeach
         </div>
     </div>
 </section>
+@endif
 
 <section class="bg-[#eaf1eb]">
     <div class="mx-auto grid max-w-7xl gap-8 px-5 py-10 sm:px-8 md:grid-cols-[.8fr_2.2fr] md:items-center lg:px-12">
@@ -85,6 +87,7 @@
     </div>
 </section>
 
+{{-- Permintaan Jasa Terbaru (Database Nyata) --}}
 <section class="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-12">
     <div class="flex flex-wrap items-end justify-between gap-3">
         <div>
@@ -93,15 +96,42 @@
         </div>
         <a href="{{ route('butuh.index') }}" class="text-sm font-bold text-emerald-800 hover:underline">Lihat semua <span aria-hidden="true">&rarr;</span></a>
     </div>
-    <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        @forelse ($butuhTerbaru as $item)
-            <x-service-card :item="$item" type="butuh" />
+    <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        @forelse ($recentRequests as $item)
+            @php
+                $rupiah = fn ($v) => 'Rp ' . number_format($v, 0, ',', '.');
+                if ($item->budget_min !== null && $item->budget_max !== null && $item->budget_min != $item->budget_max) {
+                    $price = $rupiah($item->budget_min) . ' – ' . $rupiah($item->budget_max);
+                } elseif ($item->budget_max !== null || $item->budget_min !== null) {
+                    $price = $rupiah($item->budget_max ?? $item->budget_min);
+                } else {
+                    $price = 'Terbuka';
+                }
+            @endphp
+            <a href="{{ route('service-requests.show', $item) }}" class="group flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
+                        {{ $item->category?->name ?? 'Butuh Jasa' }}
+                    </span>
+                    <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">Terbuka</span>
+                </div>
+                <h3 class="mt-3 text-base font-semibold text-slate-900 group-hover:text-indigo-600">{{ $item->title }}</h3>
+                <p class="mt-2 line-clamp-2 text-sm text-slate-500">{{ $item->description }}</p>
+                <div class="mt-auto flex items-end justify-between pt-4">
+                    <div>
+                        <p class="text-xs text-slate-400">Anggaran</p>
+                        <p class="font-bold text-slate-900">{{ $price }}</p>
+                    </div>
+                    <p class="text-xs text-slate-500">{{ $item->location ?? 'Online' }} &middot; {{ $item->customer?->name ?? 'Pengguna' }}</p>
+                </div>
+            </a>
         @empty
-            <p class="text-sm text-slate-600">Belum ada permintaan jasa terbaru.</p>
+            <p class="text-sm text-slate-600 col-span-3 py-6 text-center">Belum ada permintaan jasa terbaru yang terbuka.</p>
         @endforelse
     </div>
 </section>
 
+{{-- Penyedia Jasa Terbaru (Database Nyata) --}}
 <section class="mx-auto max-w-7xl px-5 pb-14 sm:px-8 lg:px-12">
     <div class="flex flex-wrap items-end justify-between gap-3">
         <div>
@@ -110,11 +140,30 @@
         </div>
         <a href="{{ route('sedia.index') }}" class="text-sm font-bold text-emerald-800 hover:underline">Lihat semua <span aria-hidden="true">&rarr;</span></a>
     </div>
-    <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        @forelse ($sediaTerbaru as $item)
-            <x-service-card :item="$item" type="sedia" />
+    <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        @forelse ($recentOffers as $item)
+            @php
+                $price = $item->price !== null ? 'Rp ' . number_format($item->price, 0, ',', '.') : 'Disesuaikan';
+            @endphp
+            <a href="{{ route('service-offers.show', $item) }}" class="group flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                        {{ $item->category?->name ?? 'Menyediakan Jasa' }}
+                    </span>
+                    <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700">Tersedia</span>
+                </div>
+                <h3 class="mt-3 text-base font-semibold text-slate-900 group-hover:text-emerald-700">{{ $item->title }}</h3>
+                <p class="mt-2 line-clamp-2 text-sm text-slate-500">{{ $item->description }}</p>
+                <div class="mt-auto flex items-end justify-between pt-4">
+                    <div>
+                        <p class="text-xs text-slate-400">Tarif</p>
+                        <p class="font-bold text-slate-900">{{ $price }}</p>
+                    </div>
+                    <p class="text-xs text-slate-500">{{ $item->location ?? 'Online' }} &middot; {{ $item->provider?->name ?? 'Penyedia' }}</p>
+                </div>
+            </a>
         @empty
-            <p class="text-sm text-slate-600">Belum ada penyedia jasa terbaru.</p>
+            <p class="text-sm text-slate-600 col-span-3 py-6 text-center">Belum ada penyedia jasa aktif terbaru.</p>
         @endforelse
     </div>
 </section>

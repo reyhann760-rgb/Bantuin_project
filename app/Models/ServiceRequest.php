@@ -20,6 +20,7 @@ class ServiceRequest extends Model
         'work_mode',
         'location',
         'deadline',
+        'status',
         'image',
     ];
 

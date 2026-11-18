@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\ServiceOffer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,30 +13,39 @@ class ServiceOfferController extends Controller
 
     public function index(Request $request)
     {
-        $offers = ServiceOffer::with('provider:id,name,avatar')
+        $categories = Category::all();
+
+        $offers = ServiceOffer::with(['provider:id,name,avatar', 'category'])
             ->where('status', 'active')
             ->when($request->q, fn ($q, $s) => $q->where(function ($w) use ($s) {
                 $w->where('title', 'like', "%{$s}%")
                   ->orWhere('description', 'like', "%{$s}%");
             }))
             ->when($request->work_mode, fn ($q, $m) => $q->where('work_mode', $m))
+            ->when($request->category, function ($q, $cat) {
+                $q->where(function ($w) use ($cat) {
+                    $w->where('category_id', $cat)
+                      ->orWhereHas('category', fn ($c) => $c->where('slug', $cat)->orWhere('name', $cat));
+                });
+            })
             ->latest()
             ->paginate(12)
             ->withQueryString();
 
-        return view('service-offers.index', compact('offers'));
+        return view('service-offers.index', compact('offers', 'categories'));
     }
 
     public function mine(Request $request)
     {
-        $offers = $request->user()->serviceOffers()->latest()->paginate(12);
+        $offers = $request->user()->serviceOffers()->with('category')->latest()->paginate(12);
 
         return view('service-offers.mine', compact('offers'));
     }
 
     public function create()
     {
-        return view('service-offers.create');
+        $categories = Category::all();
+        return view('service-offers.create', compact('categories'));
     }
 
     public function store(Request $request)
@@ -49,7 +59,7 @@ class ServiceOfferController extends Controller
 
     public function show(ServiceOffer $serviceOffer)
     {
-        $serviceOffer->load('provider:id,name,avatar,bio');
+        $serviceOffer->load(['provider:id,name,avatar,bio', 'category']);
 
         return view('service-offers.show', compact('serviceOffer'));
     }
@@ -57,8 +67,9 @@ class ServiceOfferController extends Controller
     public function edit(ServiceOffer $serviceOffer)
     {
         $this->authorizeOwner($serviceOffer);
+        $categories = Category::all();
 
-        return view('service-offers.edit', compact('serviceOffer'));
+        return view('service-offers.edit', compact('serviceOffer', 'categories'));
     }
 
     public function update(Request $request, ServiceOffer $serviceOffer)
@@ -102,6 +113,7 @@ class ServiceOfferController extends Controller
         return $request->validate([
             'title'         => ['required', 'string', 'max:255'],
             'description'   => ['required', 'string', 'min:20'],
+            'category_id'   => ['nullable', 'exists:categories,id'],
             'price'         => ['nullable', 'numeric', 'min:0'],
             'price_type'    => ['nullable', 'in:fixed,hourly,negotiable'],
             'work_mode'     => ['nullable', 'in:online,onsite,hybrid'],

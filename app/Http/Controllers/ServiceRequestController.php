@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\ServiceRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,31 +14,40 @@ class ServiceRequestController extends Controller
     // Daftar publik semua permintaan yang masih open (+ pencarian & filter)
     public function index(Request $request)
     {
-        $requests = ServiceRequest::with('customer:id,name,avatar')
+        $categories = Category::all();
+
+        $requests = ServiceRequest::with(['customer:id,name,avatar', 'category'])
             ->where('status', 'open')
             ->when($request->q, fn ($q, $s) => $q->where(function ($w) use ($s) {
                 $w->where('title', 'like', "%{$s}%")
                   ->orWhere('description', 'like', "%{$s}%");
             }))
             ->when($request->work_mode, fn ($q, $m) => $q->where('work_mode', $m))
+            ->when($request->category, function ($q, $cat) {
+                $q->where(function ($w) use ($cat) {
+                    $w->where('category_id', $cat)
+                      ->orWhereHas('category', fn ($c) => $c->where('slug', $cat)->orWhere('name', $cat));
+                });
+            })
             ->latest()
             ->paginate(12)
             ->withQueryString();
 
-        return view('service-requests.index', compact('requests'));
+        return view('service-requests.index', compact('requests', 'categories'));
     }
 
     // Daftar permintaan milik customer yang login
     public function mine(Request $request)
     {
-        $requests = $request->user()->serviceRequests()->latest()->paginate(12);
+        $requests = $request->user()->serviceRequests()->with('category')->latest()->paginate(12);
 
         return view('service-requests.mine', compact('requests'));
     }
 
     public function create()
     {
-        return view('service-requests.create');
+        $categories = Category::all();
+        return view('service-requests.create', compact('categories'));
     }
 
     public function store(Request $request)
@@ -53,7 +63,7 @@ class ServiceRequestController extends Controller
 
     public function show(ServiceRequest $serviceRequest)
     {
-        $serviceRequest->load('customer:id,name,avatar,bio');
+        $serviceRequest->load(['customer:id,name,avatar,bio', 'category']);
 
         return view('service-requests.show', compact('serviceRequest'));
     }
@@ -61,8 +71,9 @@ class ServiceRequestController extends Controller
     public function edit(ServiceRequest $serviceRequest)
     {
         $this->authorizeOwner($serviceRequest);
+        $categories = Category::all();
 
-        return view('service-requests.edit', compact('serviceRequest'));
+        return view('service-requests.edit', compact('serviceRequest', 'categories'));
     }
 
     public function update(Request $request, ServiceRequest $serviceRequest)
@@ -96,7 +107,7 @@ class ServiceRequestController extends Controller
     private function authorizeOwner(ServiceRequest $serviceRequest): void
     {
         abort_if(
-        $serviceRequest->customer_id !== Auth::id(),
+            $serviceRequest->customer_id !== Auth::id(),
             403,
             'Kamu bukan pemilik permintaan ini.'
         );
@@ -107,6 +118,7 @@ class ServiceRequestController extends Controller
         return $request->validate([
             'title'       => ['required', 'string', 'max:255'],
             'description' => ['required', 'string', 'min:20'],
+            'category_id' => ['nullable', 'exists:categories,id'],
             'budget_min'  => ['nullable', 'numeric', 'min:0'],
             'budget_max'  => ['nullable', 'numeric', 'min:0', 'gte:budget_min'],
             'work_mode'   => ['nullable', 'in:online,onsite,hybrid'],

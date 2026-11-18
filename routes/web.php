@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
@@ -12,18 +13,18 @@ use App\Http\Controllers\ServiceRequestController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-// Halaman utama
-Route::get('/', [PageController::class, 'home'])->name('home');
+// Halaman utama (Database Nyata)
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/beranda', [HomeController::class, 'index'])->name('beranda');
 
+// ===== Butuh Jasa (Publik / Database Nyata) =====
+Route::get('/butuh-jasa', [ServiceRequestController::class, 'index'])->name('butuh.index');
+Route::get('/service-requests', [ServiceRequestController::class, 'index'])->name('service-requests.index');
 
-// ===== Preview Frontend 1 (data dummy, bisa dibuka tanpa login) =====
-Route::get('/beranda', [PageController::class, 'home'])->name('beranda');
+// ===== Menyediakan Jasa (Publik / Database Nyata) =====
+Route::get('/menyediakan-jasa', [ServiceOfferController::class, 'index'])->name('sedia.index');
+Route::get('/service-offers', [ServiceOfferController::class, 'index'])->name('service-offers.index');
 
-Route::get('/butuh-jasa', [PageController::class, 'butuhIndex'])->name('butuh.index');
-Route::get('/butuh-jasa/{id}', [PageController::class, 'butuhShow'])->name('butuh.show');
-
-Route::get('/menyediakan-jasa', [PageController::class, 'sediaIndex'])->name('sedia.index');
-Route::get('/menyediakan-jasa/{id}', [PageController::class, 'sediaShow'])->name('sedia.show');
 
 
 // Route untuk pengguna yang belum login
@@ -65,9 +66,6 @@ Route::middleware('auth')->group(function () {
         ->name('provider.dashboard');
 
     // ===== Butuh Jasa (permintaan dari customer) =====
-    Route::get('/service-requests', [ServiceRequestController::class, 'index'])
-        ->name('service-requests.index');
-
     // Khusus customer. Harus di atas route {serviceRequest}
     Route::middleware('role:customer')->group(function () {
         Route::get('/service-requests/mine', [ServiceRequestController::class, 'mine'])
@@ -84,13 +82,7 @@ Route::middleware('auth')->group(function () {
             ->name('service-requests.destroy');
     });
 
-    Route::get('/service-requests/{serviceRequest}', [ServiceRequestController::class, 'show'])
-        ->name('service-requests.show');
-
     // ===== Menyediakan Jasa (penawaran dari provider) =====
-    Route::get('/service-offers', [ServiceOfferController::class, 'index'])
-        ->name('service-offers.index');
-
     // Khusus provider. Harus di atas route {serviceOffer}
     Route::middleware('role:provider')->group(function () {
         Route::get('/service-offers/mine', [ServiceOfferController::class, 'mine'])
@@ -106,9 +98,6 @@ Route::middleware('auth')->group(function () {
         Route::delete('/service-offers/{serviceOffer}', [ServiceOfferController::class, 'destroy'])
             ->name('service-offers.destroy');
     });
-
-    Route::get('/service-offers/{serviceOffer}', [ServiceOfferController::class, 'show'])
-        ->name('service-offers.show');
 
     // ===== Chat & Percakapan (Backend 3) =====
     Route::get('/chat', [ConversationController::class, 'index'])->name('chat.index');
@@ -147,3 +136,11 @@ Route::middleware('auth')->group(function () {
 
 // Profil Publik Pengguna (dapat dilihat publik/tamu)
 Route::get('/pengguna/{user}', [ProfileController::class, 'show'])->name('profile.show');
+
+// Detail Listing Publik (dapat dilihat publik/tamu)
+Route::get('/service-requests/{serviceRequest}', [ServiceRequestController::class, 'show'])->name('service-requests.show');
+Route::get('/butuh-jasa/{serviceRequest}', [ServiceRequestController::class, 'show'])->name('butuh.show');
+
+Route::get('/service-offers/{serviceOffer}', [ServiceOfferController::class, 'show'])->name('service-offers.show');
+Route::get('/menyediakan-jasa/{serviceOffer}', [ServiceOfferController::class, 'show'])->name('sedia.show');
+

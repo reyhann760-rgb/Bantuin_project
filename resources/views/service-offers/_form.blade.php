@@ -6,6 +6,20 @@
 
 <div class="space-y-5">
 
+    {{-- Kategori --}}
+    @if(isset($categories) && $categories->isNotEmpty())
+    <div>
+        <label for="category_id" class="mb-1.5 block text-sm font-semibold text-slate-700">Kategori</label>
+        <select id="category_id" name="category_id" class="{{ $field('category_id') }}">
+            <option value="">— Pilih Kategori —</option>
+            @foreach ($categories as $cat)
+                <option value="{{ $cat->id }}" @selected(old('category_id', $serviceOffer->category_id ?? '') == $cat->id)>{{ $cat->name }}</option>
+            @endforeach
+        </select>
+        @error('category_id') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+    </div>
+    @endif
+
     {{-- Judul --}}
     <div>
         <label for="title" class="mb-1.5 block text-sm font-semibold text-slate-700">Judul layanan <span class="text-red-500">*</span></label>
