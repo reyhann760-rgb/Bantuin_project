@@ -20,6 +20,7 @@ class ServiceOffer extends Model
         'work_mode',
         'location',
         'portfolio_url',
+        'status',
         'image',
     ];
 
