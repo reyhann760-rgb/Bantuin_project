@@ -85,6 +85,10 @@ class AuthController extends Controller
             return redirect()->route('provider.dashboard');
         }
 
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+
         abort(403, 'Role pengguna tidak valid.');
     }
 

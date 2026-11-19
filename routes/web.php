@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\HomeController;
@@ -112,6 +113,7 @@ Route::middleware('auth')->group(function () {
 
     // ===== Manajemen Kategori Admin =====
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/kategori', [AdminCategoryController::class, 'index'])->name('categories.index');
         Route::post('/kategori', [AdminCategoryController::class, 'store'])->name('categories.store');
         Route::put('/kategori/{category}', [AdminCategoryController::class, 'update'])->name('categories.update');
@@ -137,5 +139,4 @@ Route::pattern('serviceOffer', '[0-9]+');
 Route::pattern('conversation', '[0-9]+');
 Route::pattern('category', '[0-9]+');
 Route::pattern('user', '[0-9]+');
-
 
