@@ -32,11 +32,16 @@
                 @endif
                 @if(auth()->user()->role === 'admin')
                     <a href="{{ route('admin.categories.index') }}" class="text-sm font-medium text-slate-700 hover:text-indigo-600">Kategori</a>
+                    <a href="{{ route('admin.services.index') }}" class="text-sm font-medium text-slate-700 hover:text-indigo-600">Kelola Jasa</a>
                 @endif
                 <a href="{{ route('chat.index') }}" class="text-sm font-medium text-slate-700 hover:text-indigo-600">Chat</a>
                 <a href="{{ route('notifications.index') }}" class="text-sm font-medium text-slate-700 hover:text-indigo-600">Notifikasi</a>
                 <a href="{{ route('profile.edit') }}" class="text-sm font-medium text-slate-700 hover:text-indigo-600">Profil</a>
                 <a href="{{ route('dashboard') }}" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Dashboard</a>
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50">Keluar</button>
+                </form>
             @else
                 <a href="{{ $login }}" class="text-sm font-medium text-slate-700 hover:text-indigo-600">Masuk</a>
                 <a href="{{ $register }}" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Daftar</a>
@@ -59,10 +64,19 @@
                     <li><a href="{{ $cta[1] }}" class="block rounded-lg border border-emerald-600 px-3 py-2 text-center text-sm font-semibold text-emerald-700">{{ $cta[0] }}</a></li>
                 @endif
             @endauth
+            @auth
+                <li>
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="block w-full rounded-lg border border-red-200 px-3 py-2 text-center text-sm font-semibold text-red-600">Keluar</button>
+                    </form>
+                </li>
+            @endauth
             <li class="flex gap-2 pt-2">
                 @auth
                     @if(auth()->user()->role === 'admin')
                         <a href="{{ route('admin.categories.index') }}" class="flex-1 rounded-lg border border-slate-300 py-2 text-center text-sm font-medium">Kategori</a>
+                        <a href="{{ route('admin.services.index') }}" class="flex-1 rounded-lg border border-slate-300 py-2 text-center text-sm font-medium">Jasa</a>
                     @endif
                     <a href="{{ route('chat.index') }}" class="flex-1 rounded-lg border border-slate-300 py-2 text-center text-sm font-medium">Chat</a>
                     <a href="{{ route('notifications.index') }}" class="flex-1 rounded-lg border border-slate-300 py-2 text-center text-sm font-medium">Notifikasi</a>

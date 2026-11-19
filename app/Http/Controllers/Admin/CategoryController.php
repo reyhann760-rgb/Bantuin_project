@@ -87,18 +87,4 @@ class CategoryController extends Controller
             ->route('admin.categories.index')
             ->with('success', 'Kategori "' . $category->name . '" berhasil diperbarui.');
     }
-
-    /**
-     * Hapus kategori.
-     */
-    public function destroy(Category $category): RedirectResponse
-    {
-        $name = $category->name;
-        $category->delete();
-
-        return redirect()
-            ->route('admin.categories.index')
-            ->with('success', 'Kategori "' . $name . '" berhasil dihapus.');
-    }
 }
-

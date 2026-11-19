@@ -154,23 +154,6 @@
                                                 Edit
                                             </button>
 
-                                            {{-- Form Hapus --}}
-                                            <form 
-                                                action="{{ route('admin.categories.destroy', $cat) }}" 
-                                                method="POST" 
-                                                onsubmit="return confirm('Apakah Anda yakin ingin menghapus kategori &quot;{{ $cat->name }}&quot;? Seluruh listing terkait juga dapat terhapus secara cascade!')"
-                                                class="inline"
-                                            >
-                                                @csrf
-                                                @method('DELETE')
-                                                <button 
-                                                    type="submit" 
-                                                    class="rounded-lg border border-red-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-red-600 shadow-xs hover:bg-red-50 transition"
-                                                    title="Hapus Kategori"
-                                                >
-                                                    Hapus
-                                                </button>
-                                            </form>
                                         </div>
                                     </td>
                                 </tr>

@@ -23,7 +23,14 @@
             </div>
             <p class="mt-1 text-sm text-slate-500">Halo, {{ auth()->user()->name }}. Ringkasan aktivitas platform Bantuin.</p>
         </div>
-        <a href="{{ route('admin.categories.index') }}" class="rounded-lg bg-orange-500 px-5 py-2.5 text-center text-sm font-bold text-white hover:bg-orange-600">Kelola Kategori</a>
+        <div class="flex flex-col gap-2 sm:flex-row">
+            <a href="{{ route('admin.services.index') }}" class="rounded-lg bg-emerald-700 px-5 py-2.5 text-center text-sm font-bold text-white hover:bg-emerald-800">Kelola Jasa</a>
+            <a href="{{ route('admin.categories.index') }}" class="rounded-lg bg-orange-500 px-5 py-2.5 text-center text-sm font-bold text-white hover:bg-orange-600">Kelola Kategori</a>
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="w-full rounded-lg border border-red-200 bg-white px-5 py-2.5 text-center text-sm font-semibold text-red-600 hover:bg-red-50">Keluar</button>
+            </form>
+        </div>
     </div>
 </section>
 

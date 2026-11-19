@@ -27,6 +27,25 @@ class AdminDashboardTest extends TestCase
             ->assertSee('Dashboard Admin');
     }
 
+    public function test_dashboard_admin_memiliki_tombol_logout(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)->get(route('admin.dashboard'))
+            ->assertSee(route('logout'), false)
+            ->assertSee('Keluar');
+    }
+
+    public function test_admin_dapat_logout(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)->post(route('logout'))
+            ->assertRedirect(route('login'));
+
+        $this->assertGuest();
+    }
+
     public function test_non_admin_tidak_dapat_membuka_dashboard_admin(): void
     {
         $customer = User::factory()->create(['role' => 'customer']);
