@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\HomeController;
@@ -117,7 +118,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/kategori', [AdminCategoryController::class, 'index'])->name('categories.index');
         Route::post('/kategori', [AdminCategoryController::class, 'store'])->name('categories.store');
         Route::put('/kategori/{category}', [AdminCategoryController::class, 'update'])->name('categories.update');
-        Route::delete('/kategori/{category}', [AdminCategoryController::class, 'destroy'])->name('categories.destroy');
+
+        // Hapus dilakukan per jasa (bukan per kategori)
+        Route::get('/jasa', [AdminServiceController::class, 'index'])->name('services.index');
+        Route::delete('/jasa/butuh/{serviceRequest}', [AdminServiceController::class, 'destroyRequest'])->name('services.requests.destroy');
+        Route::delete('/jasa/menyediakan/{serviceOffer}', [AdminServiceController::class, 'destroyOffer'])->name('services.offers.destroy');
     });
 
 });
@@ -139,4 +144,5 @@ Route::pattern('serviceOffer', '[0-9]+');
 Route::pattern('conversation', '[0-9]+');
 Route::pattern('category', '[0-9]+');
 Route::pattern('user', '[0-9]+');
+
 

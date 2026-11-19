@@ -100,19 +100,9 @@ class AdminCategoryTest extends TestCase
         $this->assertEquals('kategori-baru', $cat->slug);
     }
 
-    public function test_admin_can_delete_category(): void
+    public function test_category_cannot_be_deleted(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
-        $cat = Category::factory()->create(['name' => 'Kategori Hapus', 'slug' => 'kategori-hapus']);
-
-        $response = $this->actingAs($admin)->delete(route('admin.categories.destroy', $cat));
-
-        $response->assertRedirect(route('admin.categories.index'));
-        $response->assertSessionHas('success');
-
-        $this->assertDatabaseMissing('categories', [
-            'id' => $cat->id,
-        ]);
+        // Penghapusan dilakukan per jasa, bukan per kategori.
+        $this->assertFalse(\Illuminate\Support\Facades\Route::has('admin.categories.destroy'));
     }
 }
-
